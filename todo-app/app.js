@@ -8,7 +8,7 @@ const filterOption = document.querySelector(".filter-todos");
 document.addEventListener('DOMContentLoaded', getStoredTodos);
 todoButton.addEventListener('click', addTodo);
 todoList.addEventListener('click', handleListClick);
-filterOption.addEventListener('click', filterTodos);
+filterOption.addEventListener('click', e => filterTodos(e.target.value));
 
 // State
 let items = [];
@@ -20,7 +20,13 @@ function getStoredTodos() {
         todosJson = '[]';
     }
     const loaded = JSON.parse(todosJson);
-    loaded.forEach(i => createTodoItem(i.name, i.complete));
+    loaded.forEach(i => {
+        const itemDiv = createTodoItem(i.name);
+        if (i.complete) {
+            toggleComplete(itemDiv);
+        }
+    });
+    saveToLocalStorage();
 }
 
 function addTodo(event) {
@@ -29,10 +35,10 @@ function addTodo(event) {
     saveToLocalStorage();
 }
 
-function createTodoItem(name, complete=false) {
+function createTodoItem(name) {
     if (items.findIndex(i => i.name === name) !== -1) return;
 
-    items.push({name, complete});
+    items.push({name, complete: false});
 
     const todoDiv = document.createElement("div");
     todoDiv.classList.add("todo");
@@ -53,11 +59,9 @@ function createTodoItem(name, complete=false) {
 
     todoInput.value = "";
 
-    if (complete) {
-        toggleComplete(todoDiv);
-    }
-
     todoList.appendChild(todoDiv);
+
+    return todoDiv;
 }
 
 function handleListClick(event) {
@@ -90,9 +94,8 @@ function toggleComplete(item) {
     saveToLocalStorage();
 }
 
-function filterTodos(event) {
+function filterTodos(option) {
     const todos = todoList.childNodes;
-    const option = event.target.value;
     if (option === 'all') {
         todos.forEach(todo => {
             todo.style.display = 'flex';
@@ -114,5 +117,6 @@ function filterTodos(event) {
 }
 
 function saveToLocalStorage() {
+    filterTodos(filterOption.value);
     localStorage.setItem('todos', JSON.stringify(items));
 }
