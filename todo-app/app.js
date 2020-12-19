@@ -86,7 +86,7 @@ function toggleComplete(item) {
     item.classList.toggle('complete');
     const name = item.childNodes[0].innerText;
     const idx = items.findIndex(i => i.name === name);
-    items[idx].complete = !items[idx].complete;
+    items[idx].complete = item.classList.contains('complete');
     saveToLocalStorage();
 }
 
