@@ -5,24 +5,39 @@ const todoList = document.querySelector('.todo-list');
 const filterOption = document.querySelector(".filter-todos");
 
 // Event listeners
-document.addEventListener('DOMContentLoaded', getLSTodos);
+document.addEventListener('DOMContentLoaded', getStoredTodos);
 todoButton.addEventListener('click', addTodo);
 todoList.addEventListener('click', handleListClick);
 filterOption.addEventListener('click', filterTodos);
 
+// State
+let items = [];
+
 // Functions
+function getStoredTodos() {
+    let todosJson = localStorage.getItem('todos');
+    if (todosJson === null) {
+        todosJson = '[]';
+    }
+    const loaded = JSON.parse(todosJson);
+    loaded.forEach(i => createTodoItem(i.name, i.complete));
+}
+
 function addTodo(event) {
     event.preventDefault();
     createTodoItem(todoInput.value);
-    todoInput.value = "";
     saveToLocalStorage();
 }
 
-function createTodoItem(itemName) {
+function createTodoItem(name, complete=false) {
+    if (items.findIndex(i => i.name === name) !== -1) return;
+
+    items.push({name, complete});
+
     const todoDiv = document.createElement("div");
     todoDiv.classList.add("todo");
     const newTodo = document.createElement("li");
-    newTodo.innerText = itemName;
+    newTodo.innerText = name;
     newTodo.classList.add("list-item");
     todoDiv.appendChild(newTodo);
     
@@ -36,22 +51,43 @@ function createTodoItem(itemName) {
     trashButton.classList.add("trash-btn");
     todoDiv.appendChild(trashButton);
 
+    todoInput.value = "";
+
+    if (complete) {
+        toggleComplete(todoDiv);
+    }
+
     todoList.appendChild(todoDiv);
 }
 
 function handleListClick(event) {
-    const item = event.target;
-    if (item.classList[0] === 'trash-btn') {
-        const todo = item.parentElement;
-        todo.classList.add('fall');
-        todo.addEventListener('transitionend', function () {
-            todo.remove();
-        });
+    const clicked = event.target;
+    if (clicked.classList[0] === 'trash-btn') {
+        deleteItem(clicked.parentElement);
     }
+    if (clicked.classList[0] === 'complete-btn') {
+        toggleComplete(clicked.parentElement);
+    }
+}
 
-    if (item.classList[0] === 'complete-btn') {
-        item.parentElement.classList.toggle('complete');
-    }
+function deleteItem(item) {
+    const name = item.childNodes[0].innerText;
+    const idx = items.findIndex(i => i.name === name);
+    items.splice(idx, 1);
+    saveToLocalStorage();
+
+    item.classList.add('fall');
+    item.addEventListener('transitionend', function () {
+        item.remove();
+    });
+}
+
+function toggleComplete(item) {
+    item.classList.toggle('complete');
+    const name = item.childNodes[0].innerText;
+    const idx = items.findIndex(i => i.name === name);
+    items[idx].complete = !items[idx].complete;
+    saveToLocalStorage();
 }
 
 function filterTodos(event) {
@@ -78,17 +114,5 @@ function filterTodos(event) {
 }
 
 function saveToLocalStorage() {
-    console.log(todoList.innerHTML);
-    const todos = [...todoList.childNodes].map(t => t.childNodes[0].innerText);
-    console.log(todos);
-    localStorage.setItem('todos', JSON.stringify(todos));
-}
-
-function getLSTodos() {
-    let todosJSON = localStorage.getItem('todos');
-    if (todosJSON === null) {
-        todosJSON = '[]';
-    }
-    const todos = JSON.parse(todosJSON);
-    todos.forEach(createTodoItem);
+    localStorage.setItem('todos', JSON.stringify(items));
 }
