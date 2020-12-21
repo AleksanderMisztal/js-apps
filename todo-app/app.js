@@ -2,7 +2,7 @@
 const todoInput = document.querySelector('.todo-input');
 const todoButton = document.querySelector('.todo-button');
 const todoList = document.querySelector('.todo-list');
-const filterOption = document.querySelector(".filter-todos");
+const filterOption = document.querySelector('.filter-todos');
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', getStoredTodos);
@@ -82,6 +82,7 @@ function deleteItem(item) {
 
     item.classList.add('fall');
     item.addEventListener('transitionend', function () {
+        console.log('removing');
         item.remove();
     });
 }
