@@ -1,4 +1,4 @@
-# simple-js-apps
+# js-apps
 
 Implementations of simple apps using HTML, JavaScript, and CSS. *For practice and fun.*
 
